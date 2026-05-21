@@ -7,6 +7,7 @@
 void Skaitymas (std::map<std::string, int>& zds);
 void spausdint (std::map<std::string, int>& zds);
 bool isrinktURL(std::string zodis);
+void galas (std::string &zodis);
 
 int main (){
 
@@ -27,16 +28,17 @@ void Skaitymas (std::map<std::string, int>& zds)
         std::cout << "Failas neatsidare" << std::endl;
         return;
     }
-    while (!fd.eof())
+    while (fd >> zodis)
     {
-        fd >> zodis;
         if (zds.find(zodis) == zds.end())
         {
+            galas(zodis);
             zds.insert({zodis, 1});
             if (isrinktURL(zodis) == true)
             {
                 zds.erase(zodis);
             }
+            
         }
         else
         {
@@ -72,4 +74,16 @@ bool isrinktURL(std::string zodis)
         }
     }
     return false;
+}
+void galas (std::string &zodis)
+{
+    int sk = zodis.size();
+    if (zodis[sk-1] == '.' || zodis[sk-1] == ',' || zodis[sk-1] == '!' || zodis[sk-1] == '?' || zodis[sk-1] == ';' || zodis[sk-1] == ':' || zodis[sk-1] == '%' || zodis[sk-1] == '"' || zodis[sk-1] == '\'' || zodis[sk-1] == ')' || zodis[sk-1] == ']' || zodis[sk-1] == '}' || zodis[sk-1] == '-' || zodis[sk-1] == '_')
+    {
+        zodis.erase(sk-1, 1);
+    }
+    else if (zodis[0] == '.' || zodis[0] == ',' || zodis[0] == '!' || zodis[0] == '?' || zodis[0] == ';' || zodis[0] == ':' || zodis[0] == '%' || zodis[0] == '"' || zodis[0] == '\'' || zodis[0] == '(' || zodis[0] == '[' || zodis[0] == '{' || zodis[0] == '-' || zodis[0] == '_')
+    {
+        zodis.erase(0, 1);
+    }
 }
