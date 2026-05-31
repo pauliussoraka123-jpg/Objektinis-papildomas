@@ -16,7 +16,7 @@ struct INFO{
 
 void Skaitymas (std::map<std::string, INFO>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld);
 void spausdint (const std::map<std::string, INFO>& zds, const std::unordered_set<std::string>& urls);
-bool isrinktURL(const std::string& zodis, const std::unordered_set<std::string>& tld);
+bool isrinktURL(const std::string zodis, const std::unordered_set<std::string>& tld);
 void galas (std::string &zodis);
 void loadURL(std::unordered_set<std::string>& tld, std::ifstream& fd);
 
@@ -116,8 +116,12 @@ void spausdint (const std::map<std::string, INFO>& zds, const std::unordered_set
     }
     fr.close();
 }
-bool isrinktURL(const std::string& zodis, const std::unordered_set<std::string>& tld)
+bool isrinktURL(const std::string zodis, const std::unordered_set<std::string>& tld)
 {
+    if (zodis.find("www.") == 0 || zodis.find("http://") == 0 || zodis.find("https://") == 0)
+    {
+        return true;
+    }
     if (zodis.find('.') != std::string::npos || zodis.find('/') != std::string::npos || zodis.find(':') != std::string::npos)
     {    
     size_t dot = zodis.rfind('.');
