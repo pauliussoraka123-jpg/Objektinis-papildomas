@@ -27,7 +27,7 @@ int main (){
     std::ifstream fd ("URLS.txt");
     if (!fd.is_open())
     {
-        std::cout << "Failas neatsidare" << std::endl;
+        std::cout << "URL Failas neatsidare" << std::endl;
         return 1;
     }
     loadURL(tld , fd);
@@ -39,8 +39,23 @@ int main (){
 }
 void Skaitymas (std::map<std::string, INFO>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld)
 {
+    std::string filename;
+    std::cout << "Esami failai:" << '\n';
+    system ("powershell ls *.txt");
+    std::cout << "Iveskite failo pavadinima:" << '\n';
+    std::cin >> filename;
+    std::ifstream fd(filename);
+    try {
+        if (!fd.is_open()) {
+            throw std::runtime_error("Nepavyko atidaryti failo: " + filename);
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "Klaida: " << e.what() << '\n';
+        return;
+    }
+
     std::string zodis;
-    std::ifstream fd ("tests.txt");
     if (!fd.is_open())
     {
         std::cout << "Failas neatsidare" << std::endl;
