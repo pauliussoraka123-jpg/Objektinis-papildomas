@@ -5,9 +5,16 @@
 #include <fstream>
 #include <vector>
 #include <unordered_set>
+#include <sstream>
+#include <set>
 
-void Skaitymas (std::map<std::string, int>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld);
-void spausdint (const std::map<std::string, int>& zds, const std::unordered_set<std::string>& urls);
+struct INFO{
+    std::set<int> eilutes;
+    int kiekis = 0;
+};
+
+void Skaitymas (std::map<std::string, INFO>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld);
+void spausdint (const std::map<std::string, INFO>& zds, const std::unordered_set<std::string>& urls);
 bool isrinktURL(const std::string& zodis, const std::unordered_set<std::string>& tld);
 void galas (std::string &zodis);
 void loadURL(std::unordered_set<std::string>& tld, std::ifstream& fd);
@@ -15,7 +22,7 @@ void loadURL(std::unordered_set<std::string>& tld, std::ifstream& fd);
 int main (){
 
     std::unordered_set<std::string> tld;
-    std::map<std::string, int> zds;
+    std::map<std::string, INFO> zds;
     std::unordered_set<std::string> urls;
     std::ifstream fd ("URLS.txt");
     if (!fd.is_open())
@@ -30,7 +37,7 @@ int main (){
     spausdint(zds, urls);
     return 0;
 }
-void Skaitymas (std::map<std::string, int>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld)
+void Skaitymas (std::map<std::string, INFO>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld)
 {
     std::string zodis;
     std::ifstream fd ("tests.txt");
@@ -39,33 +46,52 @@ void Skaitymas (std::map<std::string, int>& zds, std::unordered_set<std::string>
         std::cout << "Failas neatsidare" << std::endl;
         return;
     }
-    while (fd >> zodis)
-{
-    galas(zodis);
-
-    if (zodis.empty()) continue;
-
-    if (isrinktURL(zodis, tld))
+    std::string eile;
+    int nr = 0;
+    
+    while (std::getline(fd, eile))
     {
-        for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
-        urls.insert(zodis);
-        continue;
+        nr++;
+        std::stringstream ss(eile);
+        while (ss >> zodis)
+        {
+        galas(zodis);
+
+        if (zodis.empty()) continue;
+
+        if (isrinktURL(zodis, tld))
+        {
+            for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
+            urls.insert(zodis);
+            continue;
+        }
+        else 
+        {
+            for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
+            zds[zodis].eilutes.insert(nr);
+            zds[zodis].kiekis++;
+        }
+        }
     }
-    else 
-    {
-        for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
-        zds[zodis]++;
-    }
-}
     fd.close();
 }
 
-void spausdint (const std::map<std::string, int>& zds, const std::unordered_set<std::string>& urls)
+void spausdint (const std::map<std::string, INFO>& zds, const std::unordered_set<std::string>& urls)
 {
     std::ofstream fr ("rezultatai.txt");
-    for (const auto& [zodis, kiekis] : zds)
+    for (const auto& [zodis, INFO] : zds)
     {
-        if (kiekis > 1) fr << std::setw(20) << std::left << zodis << " " << kiekis << '\n';
+        if (INFO.kiekis > 1) 
+        {
+            fr << std::setw(20) << std::left << zodis;
+            fr << "Kiekis: " << std::setw(5) << std::left << INFO.kiekis;
+            fr << "Eilutės: ";
+            for (const auto& eilute : INFO.eilutes)
+            {
+                fr << eilute << ' ';
+            }
+            fr << '\n';
+        }
     }
     fr << "\nURL -ai:\n";
     for (const auto& url : urls)
