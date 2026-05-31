@@ -18,4 +18,4 @@ Naudojimo instrukcija:
 4. Atidaryti įdiegto projekto vieta per CMD
 5. Parasyti "make"
 6. Paleisti atidarant exe faila arba galima parasyti komanda "make run"
-7. Isvalyti sukurtus duomenis parasyti "make cleantxt" ir "make cleanexe" atskirai
+7. Isvalyti sukurtus duomenis parasyti "make clean"
