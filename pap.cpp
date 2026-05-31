@@ -3,24 +3,35 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <vector>
+#include <unordered_set>
 
-void Skaitymas (std::map<std::string, int>& zds);
-void spausdint (std::map<std::string, int>& zds);
-bool isrinktURL(std::string zodis);
+void Skaitymas (std::map<std::string, int>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld);
+void spausdint (const std::map<std::string, int>& zds, const std::unordered_set<std::string>& urls);
+bool isrinktURL(const std::string& zodis, const std::unordered_set<std::string>& tld);
 void galas (std::string &zodis);
+void loadURL(std::unordered_set<std::string>& tld, std::ifstream& fd);
 
 int main (){
 
+    std::unordered_set<std::string> tld;
     std::map<std::string, int> zds;
-    int kiek = 0;
+    std::unordered_set<std::string> urls;
+    std::ifstream fd ("URLS.txt");
+    if (!fd.is_open())
+    {
+        std::cout << "Failas neatsidare" << std::endl;
+        return 1;
+    }
+    loadURL(tld , fd);
 
-    Skaitymas(zds);
-    spausdint(zds);
+
+    Skaitymas(zds, urls, tld);
+    spausdint(zds, urls);
     return 0;
 }
-void Skaitymas (std::map<std::string, int>& zds)
+void Skaitymas (std::map<std::string, int>& zds, std::unordered_set<std::string>& urls, std::unordered_set<std::string>& tld)
 {
-
     std::string zodis;
     std::ifstream fd ("tests.txt");
     if (!fd.is_open())
@@ -29,61 +40,95 @@ void Skaitymas (std::map<std::string, int>& zds)
         return;
     }
     while (fd >> zodis)
+{
+    galas(zodis);
+
+    if (zodis.empty()) continue;
+
+    if (isrinktURL(zodis, tld))
     {
-        if (zds.find(zodis) == zds.end())
-        {
-            galas(zodis);
-            zds.insert({zodis, 1});
-            if (isrinktURL(zodis) == true)
-            {
-                zds.erase(zodis);
-            }
-            
-        }
-        else
-        {
-            zds[zodis]++;
-        }
+        for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
+        urls.insert(zodis);
+        continue;
     }
+    else 
+    {
+        for (char& c : zodis)c = std::tolower(static_cast<unsigned char>(c));
+        zds[zodis]++;
+    }
+}
     fd.close();
 }
-void spausdint (std::map<std::string, int>& zds)
+
+void spausdint (const std::map<std::string, int>& zds, const std::unordered_set<std::string>& urls)
 {
     std::ofstream fr ("rezultatai.txt");
     for (const auto& [zodis, kiekis] : zds)
     {
-        fr << std::setw(20) << std::left << zodis << " " << kiekis << '\n';
+        if (kiekis > 1) fr << std::setw(20) << std::left << zodis << " " << kiekis << '\n';
+    }
+    fr << "\nURL -ai:\n";
+    for (const auto& url : urls)
+    {
+        fr << url << '\n';
     }
     fr.close();
 }
-bool isrinktURL(std::string zodis)
+bool isrinktURL(const std::string& zodis, const std::unordered_set<std::string>& tld)
 {
-    int kiek = 0;
-    int sk = zodis.size();
-    for (int i = 0; i < sk; i++)
+    if (zodis.find('.') != std::string::npos || zodis.find('/') != std::string::npos || zodis.find(':') != std::string::npos)
+    {    
+    size_t dot = zodis.rfind('.');
+    if (dot == std::string::npos || dot == zodis.size() - 1)
     {
-        if (zodis[i] == '.') kiek++;
+        return false;
     }
-    for (int i = 0; i < sk; i++) 
-    {
-        if (kiek > 1) return true;
-        if (kiek == 1 && zodis[sk - 1] != '.') return true;
-        if (zodis[i] == '/' || zodis[i] == '\\')
+    size_t slash = zodis.find('/', dot);
+    std::string galas;
+        if (slash != std::string::npos)
+        {
+            galas = zodis.substr(dot + 1, slash - dot - 1);
+        }
+        else
+        {
+            galas = zodis.substr(dot + 1);
+        }
+
+        for (char& c : galas) c = std::toupper(static_cast<unsigned char>(c));
+
+        if (tld.find(galas) != tld.end())
         {
             return true;
         }
+        else {
+            return false;
+        }
+    }
+    else {
+        return false;
     }
     return false;
 }
-void galas (std::string &zodis)
-{
-    int sk = zodis.size();
-    if (zodis[sk-1] == '.' || zodis[sk-1] == ',' || zodis[sk-1] == '!' || zodis[sk-1] == '?' || zodis[sk-1] == ';' || zodis[sk-1] == ':' || zodis[sk-1] == '%' || zodis[sk-1] == '"' || zodis[sk-1] == '\'' || zodis[sk-1] == ')' || zodis[sk-1] == ']' || zodis[sk-1] == '}' || zodis[sk-1] == '-' || zodis[sk-1] == '_')
-    {
-        zodis.erase(sk-1, 1);
+void galas(std::string &zodis) {
+    std::string skirykliai = ".,!?;:%\\()[]{}-_−—-–\"«»<>/*-+&|^~`@#$^=\\\'1234567890"; 
+
+    while (!zodis.empty() && skirykliai.find(zodis.back()) != std::string::npos) {
+        zodis.pop_back();
     }
-    else if (zodis[0] == '.' || zodis[0] == ',' || zodis[0] == '!' || zodis[0] == '?' || zodis[0] == ';' || zodis[0] == ':' || zodis[0] == '%' || zodis[0] == '"' || zodis[0] == '\'' || zodis[0] == '(' || zodis[0] == '[' || zodis[0] == '{' || zodis[0] == '-' || zodis[0] == '_')
-    {
+
+    while (!zodis.empty() && skirykliai.find(zodis.front()) != std::string::npos) {
         zodis.erase(0, 1);
+    }
+
+}
+void loadURL(std::unordered_set<std::string>& tld, std::ifstream& fd)
+{
+    std::string s;
+    while (fd >> s)
+    {
+        for (char& c : s)
+            c = std::toupper(static_cast<unsigned char>(c));
+
+        tld.insert(s);
     }
 }
