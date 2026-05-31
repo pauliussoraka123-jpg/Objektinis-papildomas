@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <sstream>
 #include <set>
+#include <cctype>
 
 struct INFO{
     std::set<int> eilutes;
@@ -31,7 +32,7 @@ int main (){
         return 1;
     }
     loadURL(tld , fd);
-
+    fd.close();
 
     Skaitymas(zds, urls, tld);
     spausdint(zds, urls);
